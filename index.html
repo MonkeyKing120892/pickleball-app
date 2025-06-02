@@ -120,12 +120,13 @@
         }
 
         .serve-info {
-            font-size: 14px;
+            font-size: 12px;
             color: #666;
             background: #f0f0f0;
-            padding: 5px 10px;
-            border-radius: 15px;
+            padding: 3px 8px;
+            border-radius: 10px;
             display: inline-block;
+            margin-top: 5px;
         }
 
         .vs {
@@ -141,14 +142,14 @@
 
         .court {
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             margin: 0 auto;
-            aspect-ratio: 4/3;
+            aspect-ratio: 5/3;
             background: #2E8B57;
             border: 4px solid #fff;
             border-radius: 10px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 0.3fr 0.3fr 1fr;
             grid-template-rows: 1fr 1fr;
             gap: 2px;
             position: relative;
@@ -164,6 +165,7 @@
             height: 2px;
             background: white;
             transform: translateY(-50%);
+            z-index: 1;
         }
 
         .court::after {
@@ -175,6 +177,7 @@
             width: 2px;
             background: white;
             transform: translateX(-50%);
+            z-index: 1;
         }
 
         .court-section {
@@ -184,6 +187,11 @@
             justify-content: center;
             position: relative;
             border-radius: 5px;
+        }
+
+        .kitchen-zone {
+            background: rgba(255, 215, 0, 0.3);
+            border: 1px dashed #FFD700;
         }
 
         .player-position {
@@ -365,28 +373,28 @@
             <div class="court">
                 <div class="court-section" id="section-top-left">
                     <div class="player-position" id="pos-team1-player2">
-                        <span>VĐV 2<br>Đội 1</span>
+                        <span>Đội 1<br>VĐV 2</span>
                     </div>
                 </div>
                 <div class="court-section" id="section-top-right">
                     <div class="player-position" id="pos-team2-player1">
-                        <span>VĐV 1<br>Đội 2</span>
+                        <span>Đội 2<br>VĐV 1</span>
                     </div>
                 </div>
                 <div class="court-section" id="section-bottom-left">
                     <div class="player-position" id="pos-team1-player1">
-                        <span>VĐV 1<br>Đội 1</span>
+                        <span>Đội 1<br>VĐV 1</span>
                     </div>
                 </div>
                 <div class="court-section" id="section-bottom-right">
                     <div class="player-position" id="pos-team2-player2">
-                        <span>VĐV 2<br>Đội 2</span>
+                        <span>Đội 2<br>VĐV 2</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="game-status" id="game-status">
+        <div class="game-status" id="game-status" style="display: none;">
             Đội 1 giao bóng - Lượt giao: 2/2
         </div>
 
@@ -553,11 +561,11 @@
             const serveInfo2 = document.getElementById('serve-info2');
             
             if (gameState.servingTeam === 1) {
-                serveInfo1.textContent = `Giao bóng: ${gameState.serveCount}/2`;
+                serveInfo1.textContent = `Lượt giao bóng: ${gameState.serveCount}/2`;
                 serveInfo1.style.display = 'inline-block';
                 serveInfo2.style.display = 'none';
             } else {
-                serveInfo2.textContent = `Giao bóng: ${gameState.serveCount}/2`;
+                serveInfo2.textContent = `Lượt giao bóng: ${gameState.serveCount}/2`;
                 serveInfo2.style.display = 'inline-block';
                 serveInfo1.style.display = 'none';
             }
@@ -578,7 +586,7 @@
             updateCourtPlayerNames();
             updateCourtPositions();
             
-            // Update game status
+            // Update game status (hidden)
             const statusElement = document.getElementById('game-status');
             const servingTeamName = gameState.servingTeam === 1 ? 'Đội 1' : 'Đội 2';
             const servingPlayerName = gameState.servingPlayer === 1 ? 'VĐV 1' : 'VĐV 2';
