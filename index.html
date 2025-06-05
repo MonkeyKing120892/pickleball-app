@@ -3,851 +3,624 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tính Điểm Trận Đấu Pickleball</title>
+    <title>Pickleball Score Tracker</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 10px;
+            color: #333;
         }
-        
+
         .container {
             max-width: 800px;
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
         }
-        
-        .title {
+
+        .header {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            padding: 20px;
             text-align: center;
-            color: #2c3e50;
+        }
+
+        .header h1 {
             font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 5px;
         }
-        
-        .game-setup {
-            background: #ecf0f1;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .team-setup {
+
+        .teams-setup {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
-            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
         }
-        
+
         .team {
-            border: 2px solid #3498db;
-            border-radius: 10px;
-            padding: 15px;
             background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
         }
-        
+
+        .team.serving {
+            border-color: #FF6B6B;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+        }
+
         .team h3 {
             text-align: center;
-            color: #2c3e50;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #333;
         }
-        
+
         .player-input {
             margin-bottom: 10px;
         }
-        
+
         .player-input label {
             display: block;
-            font-weight: bold;
+            font-size: 12px;
+            color: #666;
             margin-bottom: 5px;
-            color: #34495e;
         }
-        
+
         .player-input input {
             width: 100%;
             padding: 8px;
-            border: 1px solid #bdc3c7;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        
-        .serve-setup {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .serve-setup label {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .serve-btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
+            border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
+            transition: border-color 0.3s ease;
         }
-        
-        .serve-btn:hover:not(:disabled) {
-            background: #2980b9;
-            transform: translateY(-2px);
+
+        .player-input input:focus {
+            outline: none;
+            border-color: #4ECDC4;
         }
-        
-        .serve-btn:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-        }
-        
-        .timeout-setup {
-            display: flex;
+
+        .score-display {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            padding: 20px;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 15px 0;
         }
-        
-        .timeout-setup label {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .timeout-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .timeout-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            min-width: 30px;
-        }
-        
-        .timeout-btn:hover:not(:disabled) {
-            background: #c0392b;
-        }
-        
-        .timeout-btn:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-        }
-        
-        .timeout-display {
-            background: white;
-            padding: 5px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            color: #2c3e50;
-            border: 2px solid #3498db;
-        }
-        
-        .court-section {
-            margin: 20px 0;
+
+        .team-score {
             text-align: center;
         }
-        
-        .switch-court-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            cursor: pointer;
-            font-size: 14px;
+
+        .team-name {
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: bold;
         }
-        
-        .switch-court-btn:hover {
-            background: #c0392b;
+
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
         }
-        
+
+        .serve-info {
+            font-size: 12px;
+            color: #666;
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .vs {
+            font-size: 24px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .court-container {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
         .court {
-            display: grid;
-            grid-template-columns: 3fr 1fr 1fr 3fr;
-            grid-template-rows: repeat(2, 80px);
-            max-width: 600px;
+            width: 100%;
+            max-width: 500px;
             margin: 0 auto;
-            border: 3px solid white;
-            background: white;
+            aspect-ratio: 5/3;
+            background: #2E8B57;
+            border: 4px solid #fff;
+            border-radius: 10px;
+            display: grid;
+            grid-template-columns: 1fr 0.3fr 0.3fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 2px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        
-        .court-cell {
-            border: 2px solid white;
+
+        .court::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: white;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .court::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: white;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .court-section {
+            background: rgba(46, 139, 87, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            font-size: 12px;
-            font-weight: bold;
+            border-radius: 5px;
         }
-        
-        .court-cell.col1 { background: #2980b9; }
-        .court-cell.col4 { background: #2980b9; }
-        .court-cell.col2, .court-cell.col3 { background: #27ae60; }
-        .court-cell.col2.row1 { border-bottom: none; }
-        .court-cell.col2.row2 { border-top: none; }
-        .court-cell.col3.row1 { border-bottom: none; }
-        .court-cell.col3.row2 { border-top: none; }
-        
+
+        .kitchen-zone {
+            background: rgba(255, 215, 0, 0.3);
+            border: 1px dashed #FFD700;
+        }
+
         .player-position {
-            position: absolute;
-            background: rgba(255,255,255,0.9);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            max-width: 80px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .player-position.left {
-            left: -5px;
-            transform: translateX(-100%);
-        }
-        
-        .player-position.right {
-            right: -5px;
-            transform: translateX(100%);
-        }
-        
-        .ball {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #f39c12;
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 50%;
-            border: 2px solid #e67e22;
-            display: none;
-            z-index: 10;
-        }
-        
-        .ball.show {
-            display: block;
-        }
-        
-        .ball.left {
-            left: 20px;
-        }
-        
-        .ball.right {
-            right: 20px;
-        }
-        
-        .serving {
-            background: #87ceeb !important;
-        }
-        
-        .scoreboard {
-            margin: 20px 0;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            grid-template-rows: repeat(5, auto);
-            gap: 10px;
-            max-width: 600px;
-            margin: 20px auto;
-        }
-        
-        .score-cell {
-            padding: 10px;
-            text-align: center;
-            border-radius: 8px;
-            background: #ecf0f1;
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        
-        .team-names {
-            font-size: 14px;
+            font-size: 10px;
             font-weight: bold;
-            color: #2c3e50;
+            text-align: center;
+            line-height: 1.2;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .player-position.serving {
+            background: #FF6B6B;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .controls {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .team-controls {
+            display: flex;
             flex-direction: column;
+            gap: 10px;
         }
-        
-        .score {
-            font-size: 48px;
-            font-weight: bold;
-            color: #e74c3c;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+
+        .team-controls h4 {
+            text-align: center;
+            margin-bottom: 5px;
+            color: #333;
         }
-        
-        .referee-score {
-            background: #3498db;
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
         }
-        
-        .vs {
-            font-size: 24px;
-            font-weight: bold;
-            color: #34495e;
-        }
-        
-        .serve-info {
-            background: #f39c12;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        .timeout-game-btn {
-            background: #9b59b6;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s;
-        }
-        
-        .timeout-game-btn:hover:not(:disabled) {
-            background: #8e44ad;
-        }
-        
-        .timeout-game-btn:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-        }
-        
-        .timeout-timer {
-            font-size: 24px;
-            font-weight: bold;
-            color: #e74c3c;
-            background: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            border: 2px solid #e74c3c;
-        }
-        
-        .action-btn {
+
+        .btn {
+            flex: 1;
             padding: 12px;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
-        }
-        
-        .score-btn {
-            background: #27ae60;
-            color: white;
-        }
-        
-        .score-btn:hover {
-            background: #229954;
-        }
-        
-        .miss-btn {
-            background: #e74c3c;
-            color: white;
-        }
-        
-        .miss-btn:hover {
-            background: #c0392b;
-        }
-        
-        .undo-btn {
-            background: #f39c12;
-            color: white;
-        }
-        
-        .undo-btn:hover {
-            background: #e67e22;
-        }
-        
-        .reset-btn {
-            background: #34495e;
-            color: white;
-            border: none;
-            padding: 15px 30px;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 14px;
+            font-weight: bold;
             cursor: pointer;
-            margin: 20px auto;
-            display: block;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
         }
-        
-        .reset-btn:hover {
-            background: #2c3e50;
+
+        .btn-score {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-score:hover {
+            background: #45a049;
             transform: translateY(-2px);
         }
-        
-        .hidden {
-            visibility: hidden;
+
+        .btn-miss {
+            background: #f44336;
+            color: white;
         }
-        
+
+        .btn-miss:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            grid-column: 1 / -1;
+            background: #FF9800;
+            color: white;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .btn-reset:hover {
+            background: #F57C00;
+            transform: translateY(-2px);
+        }
+
+        .game-status {
+            text-align: center;
+            padding: 15px;
+            background: #e3f2fd;
+            margin: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #2196F3;
+        }
+
         @media (max-width: 600px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .title {
-                font-size: 20px;
-            }
-            
-            .team-setup {
+            .teams-setup {
                 grid-template-columns: 1fr;
+                padding: 15px;
             }
             
-            .court {
-                grid-template-rows: repeat(2, 60px);
-            }
-            
-            .scoreboard {
-                font-size: 12px;
+            .score-display {
+                padding: 15px;
             }
             
             .score {
                 font-size: 36px;
             }
             
-            .serve-setup, .timeout-setup {
-                flex-direction: column;
-                gap: 10px;
+            .controls {
+                padding: 15px;
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .player-position {
+                width: 50px;
+                height: 50px;
+                font-size: 9px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="title">TÍNH ĐIỂM TRẬN ĐẤU PICKLEBALL</h1>
-        
-        <!-- Game Setup -->
-        <div class="game-setup">
-            <!-- Team Setup -->
-            <div class="team-setup">
-                <div class="team">
-                    <h3>Đội 1</h3>
-                    <div class="player-input">
-                        <label>VĐV 1:</label>
-                        <input type="text" id="team1_player1" maxlength="15" value="VĐV 1">
-                    </div>
-                    <div class="player-input">
-                        <label>VĐV 2:</label>
-                        <input type="text" id="team1_player2" maxlength="15" value="VĐV 2">
-                    </div>
+        <div class="header">
+            <h1>🏓 Pickleball Score Tracker</h1>
+            <p>Ứng dụng tính điểm chuyên nghiệp</p>
+        </div>
+
+        <div class="teams-setup">
+            <div class="team" id="team1">
+                <h3>Đội 1</h3>
+                <div class="player-input">
+                    <label>VĐV 1:</label>
+                    <input type="text" id="team1-player1" maxlength="15" placeholder="Nhập tên VĐV 1">
                 </div>
-                <div class="team">
-                    <h3>Đội 2</h3>
-                    <div class="player-input">
-                        <label>VĐV 1:</label>
-                        <input type="text" id="team2_player1" maxlength="15" value="VĐV 1">
-                    </div>
-                    <div class="player-input">
-                        <label>VĐV 2:</label>
-                        <input type="text" id="team2_player2" maxlength="15" value="VĐV 2">
-                    </div>
+                <div class="player-input">
+                    <label>VĐV 2:</label>
+                    <input type="text" id="team1-player2" maxlength="15" placeholder="Nhập tên VĐV 2">
                 </div>
             </div>
-            
-            <!-- Serve Setup -->
-            <div class="serve-setup">
-                <label>Đội phát bóng trước:</label>
-                <button class="serve-btn" id="serveBtn">Đội 1</button>
-            </div>
-            
-            <!-- Timeout Setup -->
-            <div class="timeout-setup">
-                <label>Số lần yêu cầu nghỉ giữa trận của từng đội:</label>
-                <div class="timeout-control">
-                    <button class="timeout-btn" id="timeoutMinus">-</button>
-                    <div class="timeout-display" id="timeoutDisplay">2</div>
-                    <button class="timeout-btn" id="timeoutPlus">+</button>
+            <div class="team" id="team2">
+                <h3>Đội 2</h3>
+                <div class="player-input">
+                    <label>VĐV 1:</label>
+                    <input type="text" id="team2-player1" maxlength="15" placeholder="Nhập tên VĐV 1">
+                </div>
+                <div class="player-input">
+                    <label>VĐV 2:</label>
+                    <input type="text" id="team2-player2" maxlength="15" placeholder="Nhập tên VĐV 2">
                 </div>
             </div>
         </div>
-        
-        <!-- Court Section -->
-        <div class="court-section">
-            <button class="switch-court-btn" id="switchCourtBtn">🔄 Đổi sân</button>
-            <div class="court" id="court">
-                <!-- Court cells will be generated by JavaScript -->
+
+        <div class="score-display">
+            <div class="team-score">
+                <div class="team-name" id="team1-display">Đội 1</div>
+                <div class="score" id="score1">0</div>
+                <div class="serve-info" id="serve-info1"></div>
+            </div>
+            <div class="vs">VS</div>
+            <div class="team-score">
+                <div class="team-name" id="team2-display">Đội 2</div>
+                <div class="score" id="score2">0</div>
+                <div class="serve-info" id="serve-info2"></div>
             </div>
         </div>
-        
-        <!-- Scoreboard -->
-        <div class="scoreboard">
-            <!-- Row 1 -->
-            <div class="score-cell team-names" id="team1Names">
-                <div id="team1Player1Name">VĐV 1</div>
-                <div id="team1Player2Name">VĐV 2</div>
-            </div>
-            <div class="score-cell referee-score" id="refereeScore">0-0-2</div>
-            <div class="score-cell team-names" id="team2Names">
-                <div id="team2Player1Name">VĐV 1</div>
-                <div id="team2Player2Name">VĐV 2</div>
-            </div>
-            
-            <!-- Row 2 -->
-            <div class="score-cell score" id="team1Score">0</div>
-            <div class="score-cell vs">VS</div>
-            <div class="score-cell score" id="team2Score">0</div>
-            
-            <!-- Row 3 -->
-            <div class="score-cell serve-info" id="team1ServeInfo"></div>
-            <div class="score-cell" id="timeoutTimer"></div>
-            <div class="score-cell serve-info" id="team2ServeInfo"></div>
-            
-            <!-- Row 4 -->
-            <div class="score-cell">
-                <button class="timeout-game-btn" id="team1TimeoutBtn">TIMEOUT: 2/2</button>
-            </div>
-            <div class="score-cell"></div>
-            <div class="score-cell">
-                <button class="timeout-game-btn" id="team2TimeoutBtn">TIMEOUT: 2/2</button>
-            </div>
-            
-            <!-- Row 5 -->
-            <div class="score-cell">
-                <button class="action-btn score-btn" id="scoreBtn">Ghi điểm</button>
-            </div>
-            <div class="score-cell">
-                <button class="action-btn undo-btn" id="undoBtn">Undo</button>
-            </div>
-            <div class="score-cell">
-                <button class="action-btn miss-btn" id="missBtn">Không ghi điểm</button>
+
+        <div class="court-container">
+            <div class="court">
+                <div class="court-section" id="section-top-left">
+                    <div class="player-position" id="pos-team1-player2">
+                        <span>Đội 1<br>VĐV 2</span>
+                    </div>
+                </div>
+                <div class="court-section" id="section-top-right">
+                    <div class="player-position" id="pos-team2-player1">
+                        <span>Đội 2<br>VĐV 1</span>
+                    </div>
+                </div>
+                <div class="court-section" id="section-bottom-left">
+                    <div class="player-position" id="pos-team1-player1">
+                        <span>Đội 1<br>VĐV 1</span>
+                    </div>
+                </div>
+                <div class="court-section" id="section-bottom-right">
+                    <div class="player-position" id="pos-team2-player2">
+                        <span>Đội 2<br>VĐV 2</span>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <button class="reset-btn" id="resetBtn">🔄 Bắt đầu trận mới</button>
+
+        <div class="game-status" id="game-status" style="display: none;">
+            Đội 1 giao bóng - Lượt giao: 2/2
+        </div>
+
+        <div class="controls">
+            <div class="team-controls">
+                <h4>Đội 1</h4>
+                <div class="control-buttons">
+                    <button class="btn btn-score" onclick="scorePoint(1)">✅ Ghi điểm</button>
+                    <button class="btn btn-miss" onclick="missPoint(1)">❌ Hỏng</button>
+                </div>
+            </div>
+            <div class="team-controls">
+                <h4>Đội 2</h4>
+                <div class="control-buttons">
+                    <button class="btn btn-score" onclick="scorePoint(2)">✅ Ghi điểm</button>
+                    <button class="btn btn-miss" onclick="missPoint(2)">❌ Hỏng</button>
+                </div>
+            </div>
+            <button class="btn btn-reset" onclick="resetGame()">🔄 Bắt đầu trận mới</button>
+        </div>
     </div>
 
     <script>
         // Game state
         let gameState = {
-            team1: { score: 0, timeouts: 2 },
-            team2: { score: 0, timeouts: 2 },
+            score1: 0,
+            score2: 0,
             servingTeam: 1,
-            serveNumber: 2,
-            servingPlayer: 1,
-            courtSwitched: false,
-            gameStarted: false,
-            maxTimeouts: 2,
-            history: []
+            serveCount: 2,
+            servingPlayer: 1, // 1 hoặc 2
+            isFirstServe: true,
+            // Vị trí hiện tại của các vận động viên (true = vị trí gốc, false = đã đổi)
+            team1OriginalPosition: true,
+            team2OriginalPosition: true
         };
-        
-        let timeoutInterval = null;
-        
+
         // Initialize game
-        function initializeGame() {
-            createCourt();
+        function initGame() {
             updateDisplay();
-            setupEventListeners();
+            updatePlayerNames();
+            
+            // Add event listeners for player name changes
+            document.getElementById('team1-player1').addEventListener('input', updatePlayerNames);
+            document.getElementById('team1-player2').addEventListener('input', updatePlayerNames);
+            document.getElementById('team2-player1').addEventListener('input', updatePlayerNames);
+            document.getElementById('team2-player2').addEventListener('input', updatePlayerNames);
         }
-        
-        function createCourt() {
-            const court = document.getElementById('court');
-            court.innerHTML = '';
-            
-            for (let row = 1; row <= 2; row++) {
-                for (let col = 1; col <= 4; col++) {
-                    const cell = document.createElement('div');
-                    cell.className = `court-cell col${col} row${row}`;
-                    cell.id = `cell-${col}-${row}`;
-                    
-                    // Add ball
-                    const ball = document.createElement('div');
-                    ball.className = 'ball';
-                    ball.id = `ball-${col}-${row}`;
-                    cell.appendChild(ball);
-                    
-                    court.appendChild(cell);
-                }
-            }
-            updatePlayerPositions();
+
+        function updatePlayerNames() {
+            const team1Player1 = document.getElementById('team1-player1').value || 'VĐV 1';
+            const team1Player2 = document.getElementById('team1-player2').value || 'VĐV 2';
+            const team2Player1 = document.getElementById('team2-player1').value || 'VĐV 1';
+            const team2Player2 = document.getElementById('team2-player2').value || 'VĐV 2';
+
+            // Update team display names
+            document.getElementById('team1-display').textContent = 
+                `${team1Player1} & ${team1Player2}`;
+            document.getElementById('team2-display').textContent = 
+                `${team2Player1} & ${team2Player2}`;
+
+            // Update court positions based on current positions
+            updateCourtPlayerNames();
         }
-        
-        function updatePlayerPositions() {
-            // Clear all player positions
-            document.querySelectorAll('.player-position').forEach(el => el.remove());
-            
-            const team1Player1 = document.getElementById('team1_player1').value || 'VĐV 1';
-            const team1Player2 = document.getElementById('team1_player2').value || 'VĐV 2';
-            const team2Player1 = document.getElementById('team2_player1').value || 'VĐV 1';
-            const team2Player2 = document.getElementById('team2_player2').value || 'VĐV 2';
-            
-            let positions;
-            if (!gameState.courtSwitched) {
-                positions = [
-                    { cell: 'cell-1-2', player: team1Player1, side: 'left', team: 1, playerNum: 1 },
-                    { cell: 'cell-1-1', player: team1Player2, side: 'left', team: 1, playerNum: 2 },
-                    { cell: 'cell-4-1', player: team2Player1, side: 'right', team: 2, playerNum: 1 },
-                    { cell: 'cell-4-2', player: team2Player2, side: 'right', team: 2, playerNum: 2 }
-                ];
+
+        function updateCourtPlayerNames() {
+            const team1Player1 = document.getElementById('team1-player1').value || 'VĐV 1';
+            const team1Player2 = document.getElementById('team1-player2').value || 'VĐV 2';
+            const team2Player1 = document.getElementById('team2-player1').value || 'VĐV 1';
+            const team2Player2 = document.getElementById('team2-player2').value || 'VĐV 2';
+
+            // Cập nhật vị trí theo trạng thái hiện tại
+            if (gameState.team1OriginalPosition) {
+                // Vị trí gốc cho Đội 1
+                document.getElementById('pos-team1-player1').innerHTML = 
+                    `<span>${team1Player1}<br>Đội 1</span>`;
+                document.getElementById('pos-team1-player2').innerHTML = 
+                    `<span>${team1Player2}<br>Đội 1</span>`;
             } else {
-                positions = [
-                    { cell: 'cell-4-1', player: team1Player1, side: 'right', team: 1, playerNum: 1 },
-                    { cell: 'cell-4-2', player: team1Player2, side: 'right', team: 1, playerNum: 2 },
-                    { cell: 'cell-1-2', player: team2Player1, side: 'left', team: 2, playerNum: 1 },
-                    { cell: 'cell-1-1', player: team2Player2, side: 'left', team: 2, playerNum: 2 }
-                ];
+                // Đội 1 đã đổi vị trí
+                document.getElementById('pos-team1-player1').innerHTML = 
+                    `<span>${team1Player2}<br>Đội 1</span>`;
+                document.getElementById('pos-team1-player2').innerHTML = 
+                    `<span>${team1Player1}<br>Đội 1</span>`;
             }
-            
-            positions.forEach(pos => {
-                const cell = document.getElementById(pos.cell);
-                const playerDiv = document.createElement('div');
-                playerDiv.className = `player-position ${pos.side}`;
-                playerDiv.textContent = pos.player;
-                cell.appendChild(playerDiv);
-                
-                // Highlight serving player
-                if (pos.team === gameState.servingTeam && pos.playerNum === gameState.servingPlayer) {
-                    cell.classList.add('serving');
-                    const ball = cell.querySelector('.ball');
-                    ball.classList.add('show', pos.side);
-                } else {
-                    cell.classList.remove('serving');
-                    const ball = cell.querySelector('.ball');
-                    ball.classList.remove('show', 'left', 'right');
-                }
-            });
+
+            if (gameState.team2OriginalPosition) {
+                // Vị trí gốc cho Đội 2
+                document.getElementById('pos-team2-player1').innerHTML = 
+                    `<span>${team2Player1}<br>Đội 2</span>`;
+                document.getElementById('pos-team2-player2').innerHTML = 
+                    `<span>${team2Player2}<br>Đội 2</span>`;
+            } else {
+                // Đội 2 đã đổi vị trí
+                document.getElementById('pos-team2-player1').innerHTML = 
+                    `<span>${team2Player2}<br>Đội 2</span>`;
+                document.getElementById('pos-team2-player2').innerHTML = 
+                    `<span>${team2Player1}<br>Đội 2</span>`;
+            }
         }
-        
+
+        function scorePoint(team) {
+            if (gameState.servingTeam === team) {
+                // Đội đang giao bóng ghi điểm
+                if (team === 1) {
+                    gameState.score1++;
+                } else {
+                    gameState.score2++;
+                }
+                
+                // Đổi vị trí của 2 VĐV trong đội đang giao bóng
+                if (team === 1) {
+                    gameState.team1OriginalPosition = !gameState.team1OriginalPosition;
+                } else {
+                    gameState.team2OriginalPosition = !gameState.team2OriginalPosition;
+                }
+                
+                // Đổi vị trí giao bóng trong đội (giữ nguyên quyền giao)
+                switchServingPlayerInTeam();
+            }
+            updateDisplay();
+        }
+
+        function missPoint(team) {
+            if (gameState.servingTeam === team) {
+                // Đội đang giao bóng hỏng
+                if (gameState.isFirstServe) {
+                    // Đội đầu tiên chỉ có 1 lần giao
+                    gameState.serveCount = 1;
+                    switchServingTeam();
+                    gameState.isFirstServe = false;
+                } else {
+                    // Logic bình thường
+                    gameState.serveCount++;
+                    
+                    if (gameState.serveCount > 2) {
+                        // Chuyển quyền giao bóng
+                        switchServingTeam();
+                    } else {
+                        // Đổi người giao trong cùng đội
+                        switchServingPlayerInTeam();
+                    }
+                }
+            }
+            updateDisplay();
+        }
+
+        function switchServingPlayerInTeam() {
+            gameState.servingPlayer = gameState.servingPlayer === 1 ? 2 : 1;
+        }
+
+        function switchServingTeam() {
+            gameState.servingTeam = gameState.servingTeam === 1 ? 2 : 1;
+            gameState.serveCount = 1;
+            gameState.servingPlayer = 1;
+        }
+
         function updateDisplay() {
-            // Update team names
-            const team1Player1 = document.getElementById('team1_player1').value || 'VĐV 1';
-            const team1Player2 = document.getElementById('team1_player2').value || 'VĐV 2';
-            const team2Player1 = document.getElementById('team2_player1').value || 'VĐV 1';
-            const team2Player2 = document.getElementById('team2_player2').value || 'VĐV 2';
-            
-            document.getElementById('team1Player1Name').textContent = team1Player1;
-            document.getElementById('team1Player2Name').textContent = team1Player2;
-            document.getElementById('team2Player1Name').textContent = team2Player1;
-            document.getElementById('team2Player2Name').textContent = team2Player2;
-            
             // Update scores
-            document.getElementById('team1Score').textContent = gameState.team1.score;
-            document.getElementById('team2Score').textContent = gameState.team2.score;
-            
-            // Update referee score (A-B-C format)
-            const servingScore = gameState.servingTeam === 1 ? gameState.team1.score : gameState.team2.score;
-            const receivingScore = gameState.servingTeam === 1 ? gameState.team2.score : gameState.team1.score;
-            document.getElementById('refereeScore').textContent = `${servingScore}-${receivingScore}-${gameState.serveNumber}`;
+            document.getElementById('score1').textContent = gameState.score1;
+            document.getElementById('score2').textContent = gameState.score2;
             
             // Update serve info
-            document.getElementById('team1ServeInfo').textContent = '';
-            document.getElementById('team2ServeInfo').textContent = '';
-            document.getElementById('team1ServeInfo').classList.toggle('hidden', gameState.servingTeam !== 1);
-            document.getElementById('team2ServeInfo').classList.toggle('hidden', gameState.servingTeam !== 2);
+            const serveInfo1 = document.getElementById('serve-info1');
+            const serveInfo2 = document.getElementById('serve-info2');
             
             if (gameState.servingTeam === 1) {
-                document.getElementById('team1ServeInfo').textContent = `Lượt phát bóng: ${gameState.serveNumber}/2`;
+                serveInfo1.textContent = `Lượt giao bóng: ${gameState.serveCount}/2`;
+                serveInfo1.style.display = 'inline-block';
+                serveInfo2.style.display = 'none';
             } else {
-                document.getElementById('team2ServeInfo').textContent = `Lượt phát bóng: ${gameState.serveNumber}/2`;
+                serveInfo2.textContent = `Lượt giao bóng: ${gameState.serveCount}/2`;
+                serveInfo2.style.display = 'inline-block';
+                serveInfo1.style.display = 'none';
             }
             
-            // Update timeout buttons
-            document.getElementById('team1TimeoutBtn').textContent = `TIMEOUT: ${gameState.team1.timeouts}/${gameState.maxTimeouts}`;
-            document.getElementById('team2TimeoutBtn').textContent = `TIMEOUT: ${gameState.team2.timeouts}/${gameState.maxTimeouts}`;
-            document.getElementById('team1TimeoutBtn').disabled = gameState.team1.timeouts === 0;
-            document.getElementById('team2TimeoutBtn').disabled = gameState.team2.timeouts === 0;
+            // Update team highlighting
+            const team1Element = document.getElementById('team1');
+            const team2Element = document.getElementById('team2');
             
-            // Update serve button state
-            document.getElementById('serveBtn').disabled = gameState.gameStarted;
-            
-            // Update timeout setup display
-            document.getElementById('timeoutDisplay').textContent = gameState.maxTimeouts;
-            document.getElementById('timeoutMinus').disabled = gameState.maxTimeouts <= 0;
-            document.getElementById('timeoutPlus').disabled = gameState.maxTimeouts >= 5;
-            
-            // Update player positions
-            updatePlayerPositions();
-        }
-        
-        function saveState() {
-            gameState.history.push(JSON.parse(JSON.stringify(gameState)));
-            if (gameState.history.length > 50) {
-                gameState.history.shift();
-            }
-        }
-        
-        function score() {
-            if (!gameState.gameStarted) {
-                gameState.gameStarted = true;
-            }
-            
-            saveState();
-            
-            // Add point to serving team
             if (gameState.servingTeam === 1) {
-                gameState.team1.score++;
+                team1Element.classList.add('serving');
+                team2Element.classList.remove('serving');
             } else {
-                gameState.team2.score++;
+                team2Element.classList.add('serving');
+                team1Element.classList.remove('serving');
             }
             
-            // Switch serving player positions but keep same team serving
-            gameState.servingPlayer = gameState.servingPlayer === 1 ? 2 : 1;
+            // Update court positions and player names
+            updateCourtPlayerNames();
+            updateCourtPositions();
             
-            updateDisplay();
+            // Update game status (hidden)
+            const statusElement = document.getElementById('game-status');
+            const servingTeamName = gameState.servingTeam === 1 ? 'Đội 1' : 'Đội 2';
+            const servingPlayerName = gameState.servingPlayer === 1 ? 'VĐV 1' : 'VĐV 2';
+            statusElement.textContent = 
+                `${servingTeamName} giao bóng (${servingPlayerName}) - Lượt giao: ${gameState.serveCount}/2`;
         }
-        
-        function miss() {
-            if (!gameState.gameStarted) {
-                gameState.gameStarted = true;
-            }
-            
-            saveState();
-            
-            // Increase serve number
-            gameState.serveNumber++;
-            
-            if (gameState.serveNumber === 2) {
-                // Same team, switch player
-                gameState.servingPlayer = gameState.servingPlayer === 1 ? 2 : 1;
-            } else if (gameState.serveNumber === 3) {
-                // Switch to other team
-                gameState.servingTeam = gameState.servingTeam === 1 ? 2 : 1;
-                gameState.serveNumber = 1;
-                gameState.servingPlayer = 1;
-            }
-            
-            updateDisplay();
-        }
-        
-        function undo() {
-            if (gameState.history.length > 0) {
-                const previousState = gameState.history.pop();
-                gameState = { ...previousState, history: gameState.history };
-                
-                // Stop timeout timer
-                if (timeoutInterval) {
-                    clearInterval(timeoutInterval);
-                    timeoutInterval = null;
-                    document.getElementById('timeoutTimer').innerHTML = '';
-                }
-                
-                updateDisplay();
-            }
-        }
-        
-        function timeout(team) {
-            if (team === 1 && gameState.team1.timeouts > 0) {
-                gameState.team1.timeouts--;
-            } else if (team === 2 && gameState.team2.timeouts > 0) {
-                gameState.team2.timeouts--;
-            }
-            
-            startTimeoutTimer();
-            updateDisplay();
-        }
-        
-        function startTimeoutTimer() {
-            let seconds = 60;
-            const timerElement = document.getElementById('timeoutTimer');
-            
-            if (timeoutInterval) clearInterval(timeoutInterval);
-            
-            timeoutInterval = setInterval(() => {
-                timerElement.innerHTML = `<div class="timeout-timer">${seconds}s</div>`;
-                seconds--;
-                
-                if (seconds < 0) {
-                    clearInterval(timeoutInterval);
-                    timeoutInterval = null;
-                    timerElement.innerHTML = '';
-                }
-            }, 1000);
-        }
-        
-        function switchCourt() {
-            saveState();
-            gameState.courtSwitched = !gameState.courtSwitched;
-            updateDisplay();
-        }
-        
-        function toggleServingTeam() {
-            if (!gameState.gameStarted) {
-                gameState.servingTeam = gameState.servingTeam === 1 ? 2 : 1;
-                const btn = document.getElementById('serveBtn');
-                btn.textContent = `Đội ${gameState.servingTeam}`;
-                updateDisplay();
-            }
-        }
-        
-        function adjustTimeouts(delta) {
-            const newValue = gameState.maxTimeouts + delta;
-            if (newValue >= 0 && newValue <= 5) {
-                gameState.maxTimeouts = newValue;
-                gameState.team1.timeouts = newValue;
-                gameState.team2.timeouts = newValue;
-                updateDisplay();
-            }
-        }
-        
-        function resetGame() {
-            if (timeoutInterval) {
-                clearInterval(timeoutInterval);
-                timeoutInterval = null;
-            }
-            
-            gameState = {
-                team1: { score: 0, timeouts: gameState.maxTimeouts },
-                team2: { score: 0, timeouts: gameState.maxTimeouts },
-                servingTeam: 1,
-                serveNumber: 2,
-                servingPlayer: 1,
-                courtSwitched: false,
-                gameStarted: false,
-                maxTimeouts: gameState.maxTimeouts,
-                history: []
-            };
-            
-            document.getElementById('serveBtn').textContent = 'Đội 1';
-            document.getElementById('timeoutTimer').innerHTML = '';
-            updateDisplay();
-        }
-        
-        function setupEventListeners() {
-            document.getElementById('serveBtn').addEventListener('click', toggleServingTeam);
-            document.getElementById('switchCourtBtn').addEventListener('click', switchCourt);
-            document.getElementById('scoreBtn').addEventListener('click', score);
-            document.getElementById('missBtn').addEventListener('click', miss);
-            document.getElementById('undoBtn').addEventListener('click', undo);
-            document.getElementById('team1TimeoutBtn').addEventListener('click', () => timeout(1));
-            document.getElementById('team2TimeoutBtn').addEventListener('click', () => timeout(2));
-            document.getElementById('resetBtn').addEventListener('click', resetGame);
-            
-            // Timeout setup controls
-            document.getElementById('timeoutMinus').addEventListener('click', () => adjustTimeouts(-1));
-            document.getElementById('timeoutPlus').addEventListener('click', () => adjustTimeouts(1));
-            
-            // Player name change listeners
-            ['team1_player1', 'team1_player2', 'team2_player1', 'team2_player2'].forEach(id => {
-                document.getElementById(id).addEventListener('input', updateDisplay);
+
+        function updateCourtPositions() {
+            // Clear all serving indicators
+            document.querySelectorAll('.player-position').forEach(pos => {
+                pos.classList.remove('serving');
             });
+            
+            // Highlight current serving player
+            const servingPositionId = `pos-team${gameState.servingTeam}-player${gameState.servingPlayer}`;
+            document.getElementById(servingPositionId).classList.add('serving');
         }
-        
-        // Initialize the game when page loads
-        initializeGame();
+
+        function resetGame() {
+            gameState = {
+                score1: 0,
+                score2: 0,
+                servingTeam: 1,
+                serveCount: 2,
+                servingPlayer: 1,
+                isFirstServe: true,
+                team1OriginalPosition: true,
+                team2OriginalPosition: true
+            };
+            updateDisplay();
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initGame);
     </script>
 </body>
 </html>
