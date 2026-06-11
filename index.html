@@ -1,626 +1,360 @@
+cat > /mnt/user-data/outputs/pickleball.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pickleball Score Tracker</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 10px;
-            color: #333;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-
-        .teams-setup {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-        }
-
-        .team {
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: 3px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .team.serving {
-            border-color: #FF6B6B;
-            box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
-        }
-
-        .team h3 {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 18px;
-            color: #333;
-        }
-
-        .player-input {
-            margin-bottom: 10px;
-        }
-
-        .player-input label {
-            display: block;
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .player-input input {
-            width: 100%;
-            padding: 8px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-
-        .player-input input:focus {
-            outline: none;
-            border-color: #4ECDC4;
-        }
-
-        .score-display {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            gap: 20px;
-            padding: 20px;
-            align-items: center;
-        }
-
-        .team-score {
-            text-align: center;
-        }
-
-        .team-name {
-            font-size: 16px;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        .score {
-            font-size: 48px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .serve-info {
-            font-size: 12px;
-            color: #666;
-            background: #f0f0f0;
-            padding: 3px 8px;
-            border-radius: 10px;
-            display: inline-block;
-            margin-top: 5px;
-        }
-
-        .vs {
-            font-size: 24px;
-            font-weight: bold;
-            color: #666;
-        }
-
-        .court-container {
-            padding: 20px;
-            background: #f8f9fa;
-        }
-
-        .court {
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-            aspect-ratio: 5/3;
-            background: #2E8B57;
-            border: 4px solid #fff;
-            border-radius: 10px;
-            display: grid;
-            grid-template-columns: 1fr 0.3fr 0.3fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 2px;
-            position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .court::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: white;
-            transform: translateY(-50%);
-            z-index: 1;
-        }
-
-        .court::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: white;
-            transform: translateX(-50%);
-            z-index: 1;
-        }
-
-        .court-section {
-            background: rgba(46, 139, 87, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            border-radius: 5px;
-        }
-
-        .kitchen-zone {
-            background: rgba(255, 215, 0, 0.3);
-            border: 1px dashed #FFD700;
-        }
-
-        .player-position {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: bold;
-            text-align: center;
-            line-height: 1.2;
-            color: #333;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-        }
-
-        .player-position.serving {
-            background: #FF6B6B;
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .controls {
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .team-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .team-controls h4 {
-            text-align: center;
-            margin-bottom: 5px;
-            color: #333;
-        }
-
-        .control-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-        }
-
-        .btn-score {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .btn-score:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-        }
-
-        .btn-miss {
-            background: #f44336;
-            color: white;
-        }
-
-        .btn-miss:hover {
-            background: #da190b;
-            transform: translateY(-2px);
-        }
-
-        .btn-reset {
-            grid-column: 1 / -1;
-            background: #FF9800;
-            color: white;
-            padding: 15px;
-            margin-top: 10px;
-        }
-
-        .btn-reset:hover {
-            background: #F57C00;
-            transform: translateY(-2px);
-        }
-
-        .game-status {
-            text-align: center;
-            padding: 15px;
-            background: #e3f2fd;
-            margin: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #2196F3;
-        }
-
-        @media (max-width: 600px) {
-            .teams-setup {
-                grid-template-columns: 1fr;
-                padding: 15px;
-            }
-            
-            .score-display {
-                padding: 15px;
-            }
-            
-            .score {
-                font-size: 36px;
-            }
-            
-            .controls {
-                padding: 15px;
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .player-position {
-                width: 50px;
-                height: 50px;
-                font-size: 9px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tính điểm Pickleball</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f0f0;color:#111;padding:8px}
+.app{max-width:420px;margin:0 auto}
+.section{background:#fff;border:1px solid #ddd;border-radius:12px;padding:10px;margin-bottom:8px}
+.section-title{font-size:13px;font-weight:500;color:#555;margin-bottom:8px}
+.row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.row:last-child{margin-bottom:0}
+label{font-size:13px;color:#555;white-space:nowrap}
+input[type=text]{flex:1;font-size:13px;padding:6px 8px;border:1px solid #ccc;border-radius:8px;background:#fff;color:#111}
+.mode-btn{flex:1;padding:7px;font-size:13px;border:1px solid #bbb;border-radius:8px;background:#fff;color:#111;cursor:pointer}
+.mode-btn.active{background:#185FA5;color:#fff;border-color:#185FA5}
+.counter-row{display:flex;align-items:center;gap:6px}
+.cnt-btn{width:30px;height:30px;border:1px solid #bbb;border-radius:8px;background:#eee;color:#111;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cnt-val{min-width:24px;text-align:center;font-size:15px;font-weight:500}
+.serve-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.serve-label{font-size:13px;color:#555}
+.serve-val{font-size:13px;font-weight:500}
+.swap-btn{padding:5px 10px;font-size:12px;border:1px solid #bbb;border-radius:8px;background:#eee;color:#111;cursor:pointer}
+.swap-btn:disabled{opacity:0.4;cursor:default}
+.score-table{width:100%;border-collapse:collapse}
+.score-table td{border:1px solid #ccc;padding:4px;vertical-align:middle}
+.score-num{font-size:36px;font-weight:500;text-align:center;min-width:60px}
+.call-cell{text-align:center;vertical-align:middle}
+.call-text{font-size:26px;font-weight:bold;line-height:1}
+.vs-cell{text-align:center;font-weight:bold;font-size:18px;vertical-align:middle}
+.timer-cell{text-align:center;vertical-align:middle;font-size:22px;font-weight:bold;color:#c00}
+.timeout-btn{width:100%;padding:6px 4px;font-size:12px;font-weight:500;border:1px solid #bbb;border-radius:8px;background:#eee;color:#111;cursor:pointer}
+.timeout-btn:disabled{opacity:0.4;cursor:default}
+.action-btn{width:100%;height:52px;font-size:13px;font-weight:500;border:1px solid #bbb;border-radius:8px;background:#eee;color:#111;cursor:pointer}
+.action-btn.score{background:#185FA5;color:#fff;border-color:#185FA5}
+.action-btn.fault{background:#a32d2d;color:#fff;border-color:#a32d2d}
+.reset-btn{width:100%;padding:10px;font-size:14px;font-weight:500;border:1px solid #bbb;border-radius:12px;background:#eee;color:#111;cursor:pointer;margin-top:4px}
+.names-cell{font-size:11px;line-height:1.5}
+.team-label{font-size:11px;color:#888}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🏓 Pickleball Score Tracker</h1>
-            <p>Ứng dụng tính điểm chuyên nghiệp</p>
-        </div>
+<div class="app">
+<h2 style="text-align:center;font-size:17px;margin-bottom:8px;font-weight:600">🏓 Tính điểm Pickleball</h2>
 
-        <div class="teams-setup">
-            <div class="team" id="team1">
-                <h3>Đội 1</h3>
-                <div class="player-input">
-                    <label>VĐV 1:</label>
-                    <input type="text" id="team1-player1" maxlength="15" placeholder="Nhập tên VĐV 1">
-                </div>
-                <div class="player-input">
-                    <label>VĐV 2:</label>
-                    <input type="text" id="team1-player2" maxlength="15" placeholder="Nhập tên VĐV 2">
-                </div>
-            </div>
-            <div class="team" id="team2">
-                <h3>Đội 2</h3>
-                <div class="player-input">
-                    <label>VĐV 1:</label>
-                    <input type="text" id="team2-player1" maxlength="15" placeholder="Nhập tên VĐV 1">
-                </div>
-                <div class="player-input">
-                    <label>VĐV 2:</label>
-                    <input type="text" id="team2-player2" maxlength="15" placeholder="Nhập tên VĐV 2">
-                </div>
-            </div>
-        </div>
+<div class="section" id="setup-section">
+  <div class="section-title">Chế độ thi đấu</div>
+  <div class="row">
+    <button class="mode-btn active" id="btn-singles" onclick="setMode('singles')">Đơn</button>
+    <button class="mode-btn" id="btn-doubles" onclick="setMode('doubles')">Đôi</button>
+  </div>
+  <div class="section-title" style="margin-top:8px">Tên vận động viên</div>
+  <div class="row"><label>Đội 1 - VĐV 1:</label><input type="text" id="p1a" value="VĐV 1A"></div>
+  <div class="row" id="row-p1b"><label>Đội 1 - VĐV 2:</label><input type="text" id="p1b" value="VĐV 1B"></div>
+  <div class="row"><label>Đội 2 - VĐV 1:</label><input type="text" id="p2a" value="VĐV 2A"></div>
+  <div class="row" id="row-p2b"><label>Đội 2 - VĐV 2:</label><input type="text" id="p2b" value="VĐV 2B"></div>
+  <div class="section-title" style="margin-top:8px">Số lần timeout tối đa (W)</div>
+  <div class="counter-row">
+    <label style="font-size:13px;color:#555">W =</label>
+    <button class="cnt-btn" onclick="changeW(-1)">−</button>
+    <span class="cnt-val" id="w-val">1</span>
+    <button class="cnt-btn" onclick="changeW(1)">+</button>
+  </div>
+</div>
 
-        <div class="score-display">
-            <div class="team-score">
-                <div class="team-name" id="team1-display">Đội 1</div>
-                <div class="score" id="score1">0</div>
-                <div class="serve-info" id="serve-info1"></div>
-            </div>
-            <div class="vs">VS</div>
-            <div class="team-score">
-                <div class="team-name" id="team2-display">Đội 2</div>
-                <div class="score" id="score2">0</div>
-                <div class="serve-info" id="serve-info2"></div>
-            </div>
-        </div>
+<div class="section">
+  <div class="serve-row">
+    <span class="serve-label">Đội phát bóng trước:</span>
+    <span class="serve-val" id="first-serve-label">Đội 1</span>
+    <button class="swap-btn" id="first-serve-btn" onclick="swapFirstServe()">Đổi</button>
+  </div>
+</div>
 
-        <div class="court-container">
-            <div class="court">
-                <div class="court-section" id="section-top-left">
-                    <div class="player-position" id="pos-team1-player2">
-                        <span>Đội 1<br>VĐV 2</span>
-                    </div>
-                </div>
-                <div class="court-section" id="section-top-right">
-                    <div class="player-position" id="pos-team2-player1">
-                        <span>Đội 2<br>VĐV 1</span>
-                    </div>
-                </div>
-                <div class="court-section" id="section-bottom-left">
-                    <div class="player-position" id="pos-team1-player1">
-                        <span>Đội 1<br>VĐV 1</span>
-                    </div>
-                </div>
-                <div class="court-section" id="section-bottom-right">
-                    <div class="player-position" id="pos-team2-player2">
-                        <span>Đội 2<br>VĐV 2</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="section" id="court-section">
+  <div class="row" style="justify-content:flex-end;margin-bottom:6px">
+    <button class="swap-btn" onclick="swapSides()">⇄ Đổi sân</button>
+  </div>
+  <canvas id="court" width="380" height="160" style="width:100%;display:block;border-radius:4px"></canvas>
+</div>
 
-        <div class="game-status" id="game-status" style="display: none;">
-            Đội 1 giao bóng - Lượt giao: 2/2
-        </div>
+<div class="section">
+  <table class="score-table" style="width:100%">
+    <colgroup><col style="width:38%"><col style="width:24%"><col style="width:38%"></colgroup>
+    <tr>
+      <td class="names-cell">
+        <span class="team-label">Đội 1</span><br>
+        <span id="disp-p1a">VĐV 1A</span><br>
+        <span id="disp-p1b" style="display:none">VĐV 1B</span>
+      </td>
+      <td class="call-cell">
+        <div class="call-text" id="call-text">2-2-2</div>
+      </td>
+      <td class="names-cell" style="text-align:right">
+        <span class="team-label">Đội 2</span><br>
+        <span id="disp-p2a">VĐV 2A</span><br>
+        <span id="disp-p2b" style="display:none">VĐV 2B</span>
+      </td>
+    </tr>
+    <tr>
+      <td class="score-num" id="score-t1">0</td>
+      <td class="vs-cell">VS</td>
+      <td class="score-num" id="score-t2" style="text-align:center">0</td>
+    </tr>
+    <tr>
+      <td style="font-size:11px;color:#888;text-align:center" id="serve-info-t1"></td>
+      <td></td>
+      <td style="font-size:11px;color:#888;text-align:center" id="serve-info-t2"></td>
+    </tr>
+    <tr>
+      <td><button class="timeout-btn" id="to-btn1" onclick="callTimeout(1)">TIMEOUT: 1/1</button></td>
+      <td class="timer-cell" id="timer-cell"></td>
+      <td><button class="timeout-btn" id="to-btn2" onclick="callTimeout(2)">TIMEOUT: 1/1</button></td>
+    </tr>
+    <tr>
+      <td><button class="action-btn score" onclick="doScore()">Ghi điểm</button></td>
+      <td><button class="action-btn" onclick="doUndo()">Undo</button></td>
+      <td><button class="action-btn fault" onclick="doFault()">Không ghi điểm</button></td>
+    </tr>
+  </table>
+</div>
 
-        <div class="controls">
-            <div class="team-controls">
-                <h4>Đội 1</h4>
-                <div class="control-buttons">
-                    <button class="btn btn-score" onclick="scorePoint(1)">✅ Ghi điểm</button>
-                    <button class="btn btn-miss" onclick="missPoint(1)">❌ Hỏng</button>
-                </div>
-            </div>
-            <div class="team-controls">
-                <h4>Đội 2</h4>
-                <div class="control-buttons">
-                    <button class="btn btn-score" onclick="scorePoint(2)">✅ Ghi điểm</button>
-                    <button class="btn btn-miss" onclick="missPoint(2)">❌ Hỏng</button>
-                </div>
-            </div>
-            <button class="btn btn-reset" onclick="resetGame()">🔄 Bắt đầu trận mới</button>
-        </div>
-    </div>
+<button class="reset-btn" onclick="resetMatch()">🔄 Bắt đầu trận mới</button>
+</div>
 
-    <script>
-        // Game state
-        let gameState = {
-            score1: 0,
-            score2: 0,
-            servingTeam: 1,
-            serveCount: 2,
-            servingPlayer: 1, // 1 hoặc 2
-            isFirstServe: true,
-            // Vị trí hiện tại của các vận động viên (true = vị trí gốc, false = đã đổi)
-            team1OriginalPosition: true,
-            team2OriginalPosition: true
-        };
+<script>
+var mode='singles';
+var W=1,Y=1,Z=1;
+var firstServeTeam=1;
+var gameStarted=false;
+var serveTeam=1,serveX=2;
+var score=[0,0];
+var timerInterval=null,timerVal=0;
+var history=[];
+var court={
+  sidesSwapped:false,
+  t1:[{row:1},{row:0}],
+  t2:[{row:0},{row:1}],
+  ball:{team:1,player:0}
+};
 
-        // Initialize game
-        function initGame() {
-            updateDisplay();
-            updatePlayerNames();
-            
-            // Add event listeners for player name changes
-            document.getElementById('team1-player1').addEventListener('input', updatePlayerNames);
-            document.getElementById('team1-player2').addEventListener('input', updatePlayerNames);
-            document.getElementById('team2-player1').addEventListener('input', updatePlayerNames);
-            document.getElementById('team2-player2').addEventListener('input', updatePlayerNames);
-        }
+function getNames(){
+  return {
+    p1a:document.getElementById('p1a').value||'VĐV 1A',
+    p1b:document.getElementById('p1b').value||'VĐV 1B',
+    p2a:document.getElementById('p2a').value||'VĐV 2A',
+    p2b:document.getElementById('p2b').value||'VĐV 2B'
+  };
+}
 
-        function updatePlayerNames() {
-            const team1Player1 = document.getElementById('team1-player1').value || 'VĐV 1';
-            const team1Player2 = document.getElementById('team1-player2').value || 'VĐV 2';
-            const team2Player1 = document.getElementById('team2-player1').value || 'VĐV 1';
-            const team2Player2 = document.getElementById('team2-player2').value || 'VĐV 2';
+function setMode(m){
+  mode=m;
+  document.getElementById('btn-singles').classList.toggle('active',m==='singles');
+  document.getElementById('btn-doubles').classList.toggle('active',m==='doubles');
+  document.getElementById('row-p1b').style.display=m==='doubles'?'':'none';
+  document.getElementById('row-p2b').style.display=m==='doubles'?'':'none';
+  document.getElementById('disp-p1b').style.display=m==='doubles'?'':'none';
+  document.getElementById('disp-p2b').style.display=m==='doubles'?'':'none';
+  drawCourt();
+}
 
-            // Update team display names
-            document.getElementById('team1-display').textContent = 
-                `${team1Player1} & ${team1Player2}`;
-            document.getElementById('team2-display').textContent = 
-                `${team2Player1} & ${team2Player2}`;
+function changeW(d){
+  W=Math.max(0,Math.min(5,W+d));
+  document.getElementById('w-val').textContent=W;
+}
 
-            // Update court positions based on current positions
-            updateCourtPlayerNames();
-        }
+function swapFirstServe(){
+  if(gameStarted)return;
+  firstServeTeam=firstServeTeam===1?2:1;
+  document.getElementById('first-serve-label').textContent='Đội '+firstServeTeam;
+}
 
-        function updateCourtPlayerNames() {
-            const team1Player1 = document.getElementById('team1-player1').value || 'VĐV 1';
-            const team1Player2 = document.getElementById('team1-player2').value || 'VĐV 2';
-            const team2Player1 = document.getElementById('team2-player1').value || 'VĐV 1';
-            const team2Player2 = document.getElementById('team2-player2').value || 'VĐV 2';
+function saveHistory(){
+  history.push(JSON.parse(JSON.stringify({
+    score:score.slice(),serveTeam,serveX,Y,Z,
+    courtT1:court.t1.map(function(x){return Object.assign({},x);}),
+    courtT2:court.t2.map(function(x){return Object.assign({},x);}),
+    courtBall:Object.assign({},court.ball)
+  })));
+  if(history.length>50)history.shift();
+}
 
-            // Cập nhật vị trí theo trạng thái hiện tại
-            if (gameState.team1OriginalPosition) {
-                // Vị trí gốc cho Đội 1
-                document.getElementById('pos-team1-player1').innerHTML = 
-                    `<span>${team1Player1}<br>Đội 1</span>`;
-                document.getElementById('pos-team1-player2').innerHTML = 
-                    `<span>${team1Player2}<br>Đội 1</span>`;
-            } else {
-                // Đội 1 đã đổi vị trí
-                document.getElementById('pos-team1-player1').innerHTML = 
-                    `<span>${team1Player2}<br>Đội 1</span>`;
-                document.getElementById('pos-team1-player2').innerHTML = 
-                    `<span>${team1Player1}<br>Đội 1</span>`;
-            }
+function doScore(){
+  saveHistory();
+  if(!gameStarted){gameStarted=true;document.getElementById('first-serve-btn').disabled=true;}
+  score[serveTeam-1]++;
+  if(mode==='doubles'){
+    var t=serveTeam===1?court.t1:court.t2;
+    var tmp=t[0].row;t[0].row=t[1].row;t[1].row=tmp;
+  }
+  updateUI();
+}
 
-            if (gameState.team2OriginalPosition) {
-                // Vị trí gốc cho Đội 2
-                document.getElementById('pos-team2-player1').innerHTML = 
-                    `<span>${team2Player1}<br>Đội 2</span>`;
-                document.getElementById('pos-team2-player2').innerHTML = 
-                    `<span>${team2Player2}<br>Đội 2</span>`;
-            } else {
-                // Đội 2 đã đổi vị trí
-                document.getElementById('pos-team2-player1').innerHTML = 
-                    `<span>${team2Player2}<br>Đội 2</span>`;
-                document.getElementById('pos-team2-player2').innerHTML = 
-                    `<span>${team2Player1}<br>Đội 2</span>`;
-            }
-        }
+function doFault(){
+  saveHistory();
+  if(!gameStarted){gameStarted=true;document.getElementById('first-serve-btn').disabled=true;}
+  if(mode==='singles'){
+    serveTeam=serveTeam===1?2:1;
+    serveX=1;
+    court.ball={team:serveTeam,player:0};
+  } else {
+    serveX++;
+    if(serveX===2){
+      var nextPIdx=court.ball.player===0?1:0;
+      court.ball={team:serveTeam,player:nextPIdx};
+    } else if(serveX>=3){
+      serveX=1;
+      serveTeam=serveTeam===1?2:1;
+      court.ball={team:serveTeam,player:0};
+    }
+  }
+  updateUI();
+}
 
-        function scorePoint(team) {
-            if (gameState.servingTeam === team) {
-                // Đội đang giao bóng ghi điểm
-                if (team === 1) {
-                    gameState.score1++;
-                } else {
-                    gameState.score2++;
-                }
-                
-                // Đổi vị trí của 2 VĐV trong đội đang giao bóng
-                if (team === 1) {
-                    gameState.team1OriginalPosition = !gameState.team1OriginalPosition;
-                } else {
-                    gameState.team2OriginalPosition = !gameState.team2OriginalPosition;
-                }
-                
-                // Đổi vị trí giao bóng trong đội (giữ nguyên quyền giao)
-                switchServingPlayerInTeam();
-            }
-            updateDisplay();
-        }
+function doUndo(){
+  if(history.length===0)return;
+  var s=history.pop();
+  score=s.score;serveTeam=s.serveTeam;serveX=s.serveX;Y=s.Y;Z=s.Z;
+  court.t1=s.courtT1;court.t2=s.courtT2;court.ball=s.courtBall;
+  stopTimer();
+  updateUI();
+}
 
-        function missPoint(team) {
-            if (gameState.servingTeam === team) {
-                // Đội đang giao bóng hỏng
-                if (gameState.isFirstServe) {
-                    // Đội đầu tiên chỉ có 1 lần giao
-                    gameState.serveCount = 1;
-                    switchServingTeam();
-                    gameState.isFirstServe = false;
-                } else {
-                    // Logic bình thường
-                    gameState.serveCount++;
-                    
-                    if (gameState.serveCount > 2) {
-                        // Chuyển quyền giao bóng
-                        switchServingTeam();
-                    } else {
-                        // Đổi người giao trong cùng đội
-                        switchServingPlayerInTeam();
-                    }
-                }
-            }
-            updateDisplay();
-        }
+function callTimeout(team){
+  if(team===1&&Y<=0)return;
+  if(team===2&&Z<=0)return;
+  saveHistory();
+  if(team===1)Y--;else Z--;
+  startTimer();
+  updateUI();
+}
 
-        function switchServingPlayerInTeam() {
-            gameState.servingPlayer = gameState.servingPlayer === 1 ? 2 : 1;
-        }
+function startTimer(){
+  stopTimer();
+  timerVal=60;
+  var cell=document.getElementById('timer-cell');
+  cell.textContent=timerVal+'s';
+  timerInterval=setInterval(function(){
+    timerVal--;
+    if(timerVal<=0){timerVal=0;stopTimer();cell.textContent='';return;}
+    cell.textContent=timerVal+'s';
+  },1000);
+}
 
-        function switchServingTeam() {
-            gameState.servingTeam = gameState.servingTeam === 1 ? 2 : 1;
-            gameState.serveCount = 1;
-            gameState.servingPlayer = 1;
-        }
+function stopTimer(){
+  if(timerInterval)clearInterval(timerInterval);
+  timerInterval=null;
+  document.getElementById('timer-cell').textContent='';
+}
 
-        function updateDisplay() {
-            // Update scores
-            document.getElementById('score1').textContent = gameState.score1;
-            document.getElementById('score2').textContent = gameState.score2;
-            
-            // Update serve info
-            const serveInfo1 = document.getElementById('serve-info1');
-            const serveInfo2 = document.getElementById('serve-info2');
-            
-            if (gameState.servingTeam === 1) {
-                serveInfo1.textContent = `Lượt giao bóng: ${gameState.serveCount}/2`;
-                serveInfo1.style.display = 'inline-block';
-                serveInfo2.style.display = 'none';
-            } else {
-                serveInfo2.textContent = `Lượt giao bóng: ${gameState.serveCount}/2`;
-                serveInfo2.style.display = 'inline-block';
-                serveInfo1.style.display = 'none';
-            }
-            
-            // Update team highlighting
-            const team1Element = document.getElementById('team1');
-            const team2Element = document.getElementById('team2');
-            
-            if (gameState.servingTeam === 1) {
-                team1Element.classList.add('serving');
-                team2Element.classList.remove('serving');
-            } else {
-                team2Element.classList.add('serving');
-                team1Element.classList.remove('serving');
-            }
-            
-            // Update court positions and player names
-            updateCourtPlayerNames();
-            updateCourtPositions();
-            
-            // Update game status (hidden)
-            const statusElement = document.getElementById('game-status');
-            const servingTeamName = gameState.servingTeam === 1 ? 'Đội 1' : 'Đội 2';
-            const servingPlayerName = gameState.servingPlayer === 1 ? 'VĐV 1' : 'VĐV 2';
-            statusElement.textContent = 
-                `${servingTeamName} giao bóng (${servingPlayerName}) - Lượt giao: ${gameState.serveCount}/2`;
-        }
+function swapSides(){
+  var tmpT1=court.t1,tmpT2=court.t2;
+  court.t1=tmpT2;court.t2=tmpT1;
+  court.ball.team=court.ball.team===1?2:1;
+  updateUI();
+}
 
-        function updateCourtPositions() {
-            // Clear all serving indicators
-            document.querySelectorAll('.player-position').forEach(pos => {
-                pos.classList.remove('serving');
-            });
-            
-            // Highlight current serving player
-            const servingPositionId = `pos-team${gameState.servingTeam}-player${gameState.servingPlayer}`;
-            document.getElementById(servingPositionId).classList.add('serving');
-        }
+function updateUI(){
+  var n=getNames();
+  document.getElementById('disp-p1a').textContent=n.p1a;
+  document.getElementById('disp-p1b').textContent=n.p1b;
+  document.getElementById('disp-p2a').textContent=n.p2a;
+  document.getElementById('disp-p2b').textContent=n.p2b;
+  document.getElementById('score-t1').textContent=score[0];
+  document.getElementById('score-t2').textContent=score[1];
+  var sA=score[serveTeam-1],sB=score[serveTeam===1?1:0];
+  var callStr;
+  if(mode==='singles') callStr=sA+'-'+sB+'-'+(serveTeam===1?'1':'2');
+  else callStr=sA+'-'+sB+'-'+serveX;
+  document.getElementById('call-text').textContent=callStr;
+  document.getElementById('serve-info-t1').textContent=serveTeam===1?'Lượt phát: '+serveX+'/2':'';
+  document.getElementById('serve-info-t2').textContent=serveTeam===2?'Lượt phát: '+serveX+'/2':'';
+  document.getElementById('to-btn1').textContent='TIMEOUT: '+Y+'/'+W;
+  document.getElementById('to-btn2').textContent='TIMEOUT: '+Z+'/'+W;
+  document.getElementById('to-btn1').disabled=Y<=0;
+  document.getElementById('to-btn2').disabled=Z<=0;
+  drawCourt();
+}
 
-        function resetGame() {
-            gameState = {
-                score1: 0,
-                score2: 0,
-                servingTeam: 1,
-                serveCount: 2,
-                servingPlayer: 1,
-                isFirstServe: true,
-                team1OriginalPosition: true,
-                team2OriginalPosition: true
-            };
-            updateDisplay();
-        }
+function drawCourt(){
+  var c=document.getElementById('court');
+  var ctx=c.getContext('2d');
+  var CW=c.width,CH=c.height;
+  var c1w=CW/3.667,c23w=c1w/3;
+  var cols=[0,c1w,c1w+c23w,c1w+c23w*2,CW];
+  ctx.clearRect(0,0,CW,CH);
+  ctx.fillStyle='#0a5c0a';
+  ctx.fillRect(cols[1],0,cols[2]-cols[1],CH);
+  ctx.fillRect(cols[2],0,cols[3]-cols[2],CH);
+  for(var row=0;row<2;row++){
+    var ry=row*(CH/2);
+    ctx.fillStyle='#1565C0';
+    ctx.fillRect(cols[0],ry,c1w,CH/2);
+    ctx.fillRect(cols[3],ry,CW-cols[3],CH/2);
+  }
+  ctx.strokeStyle='#ffffff';ctx.lineWidth=2;
+  ctx.strokeRect(1,1,CW-2,CH-2);
+  [cols[1],cols[2],cols[3]].forEach(function(x){
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,CH);ctx.stroke();
+  });
+  ctx.beginPath();ctx.moveTo(cols[0],CH/2);ctx.lineTo(cols[1],CH/2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cols[3],CH/2);ctx.lineTo(CW,CH/2);ctx.stroke();
+  var n=getNames();
+  var t1names=[n.p1a,n.p1b];
+  var t2names=[n.p2a,n.p2b];
+  var maxP=mode==='doubles'?2:1;
+  for(var pi=0;pi<maxP;pi++){
+    var t1p=court.t1[pi];
+    var ry1=t1p.row*(CH/2);
+    var isS1=court.ball.team===1&&court.ball.player===pi;
+    if(isS1){ctx.fillStyle='rgba(100,180,255,0.55)';ctx.fillRect(cols[0],ry1,c1w,CH/2);}
+    ctx.fillStyle='#fff';ctx.font='bold 11px Arial';
+    ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.fillText(t1names[pi],cols[1]-6,ry1+CH/4);
+    if(isS1) drawBall(ctx,cols[0]+12,ry1+CH/4);
+    var t2p=court.t2[pi];
+    var ry2=t2p.row*(CH/2);
+    var isS2=court.ball.team===2&&court.ball.player===pi;
+    if(isS2){ctx.fillStyle='rgba(100,180,255,0.55)';ctx.fillRect(cols[3],ry2,CW-cols[3],CH/2);}
+    ctx.fillStyle='#fff';ctx.font='bold 11px Arial';
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(t2names[pi],cols[3]+6,ry2+CH/4);
+    if(isS2) drawBall(ctx,CW-12,ry2+CH/4);
+  }
+}
 
-        // Initialize when page loads
-        window.addEventListener('load', initGame);
-    </script>
+function drawBall(ctx,x,y){
+  ctx.save();
+  ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);
+  ctx.fillStyle='#c8e832';ctx.fill();
+  ctx.strokeStyle='#888';ctx.lineWidth=1;ctx.stroke();
+  ctx.restore();
+}
+
+function resetMatch(){
+  score=[0,0];
+  serveTeam=firstServeTeam;
+  serveX=mode==='doubles'?2:1;
+  Y=W;Z=W;
+  gameStarted=false;
+  history=[];
+  court.sidesSwapped=false;
+  court.t1=[{row:1},{row:0}];
+  court.t2=[{row:0},{row:1}];
+  court.ball={team:firstServeTeam,player:0};
+  document.getElementById('first-serve-btn').disabled=false;
+  document.getElementById('first-serve-label').textContent='Đội '+firstServeTeam;
+  stopTimer();
+  updateUI();
+}
+
+setMode('singles');
+resetMatch();
+</script>
 </body>
 </html>
+HTMLEOF
+echo "done"
